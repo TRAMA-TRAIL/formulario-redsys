@@ -78,7 +78,7 @@
 
   <!-- Formulario oculto para Redsys -->
   <form id="redsysForm"
-        action="https://sis-t.redsys.es:25443/sis/realizarPago" 
+        action="https://sis-t.redsys.es:25443/sis/tpv.jsp" 
         method="POST"
         target="_top">
 
@@ -88,7 +88,7 @@
     <input type="hidden" name="Ds_Merchant_MerchantCode" value="999000008">
     <input type="hidden" name="Ds_Merchant_Currency" value="978">
     <input type="hidden" name="Ds_Merchant_TransactionType" value="0">
-    <input type="hidden" name="Ds_Merchant_Terminal" value="100">
+    <input type="hidden" name="Ds_Merchant_Terminal" value="1">
   </form>
 
   <button onclick="enviarAPago()">Ir al pago</button>
