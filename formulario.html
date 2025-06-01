@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Inscripción Carrera + Pago</title>
+  <style>
+    body {
+      font-family: Arial;
+      max-width: 500px;
+      margin: auto;
+      padding: 20px;
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      text-align: left;
+    }
+    .hidden {
+      display: none;
+    }
+    small {
+      display: block;
+      font-size: 0.9em;
+      color: gray;
+      margin-left: 24px;
+    }
+    h3 {
+      color: green;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+    input[type="number"] {
+      width: 50px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Formulario de Inscripción</h1>
+
+  <!-- Campo 1: Modalidad -->
+  <label>Modalidad:
+    <select id="modalidad" onchange="calcular()">
+      <option value="20">21K - 20€</option>
+      <option value="18">13K - 18€</option>
+      <option value="16">5K - 16€</option>
+    </select>
+  </label>
+
+  <!-- Campo 2: Federado -->
+  <label>
+    <input type="checkbox" id="federado" onchange="calcular()">
+    ¿Eres corredor federado?
+    <small>Marca si estás federado por la Federación Aragonesa de Atletismo</small>
+  </label>
+
+  <!-- Campo 3: Comida -->
+  <label>
+    <input type="checkbox" id="comida" onchange="toggleAcompanantes(); calcular()">
+    ¿Te quedas a comer?
+    <small>5€ participantes</small>
+  </label>
+
+  <!-- Campo 4: Acompañantes -->
+  <div id="acompanantesContainer" class="hidden">
+    <label>Cantidad de acompañantes:
+      <input type="number" id="acompanantes" min="0" value="0" onchange="calcular()">
+    </label>
+  </div>
+
+  <!-- Muestra del cálculo -->
+  <h3>Total: <span id="total">0</span> €</h3>
+
+  <!-- Formulario oculto para Redsys -->
+  <form id="redsysForm"
+        action="https://sis-t.redsys.es:25443/sis/realizarPago" 
+        method="POST"
+        target="_top">
+
+    <!-- Campos que Redsys espera recibir -->
+    <input type="hidden" name="Ds_Merchant_Amount" id="amountField" value="">
+    <input type="hidden" name="Ds_Merchant_Order" value="00001">
+    <input type="hidden" name="Ds_Merchant_MerchantCode" value="999000008">
+    <input type="hidden" name="Ds_Merchant_Currency" value="978">
+    <input type="hidden" name="Ds_Merchant_TransactionType" value="0">
+    <input type="hidden" name="Ds_Merchant_Terminal" value="100">
+  </form>
+
+  <button onclick="enviarAPago()">Ir al pago</button>
+
+  <script>
+    function calcular() {
+      let precio = parseFloat(document.getElementById("modalidad").value);
+      let esFederado = document.getElementById("federado").checked;
+      let tieneComida = document.getElementById("comida").checked;
+      let numAcompanantes = parseInt(document.getElementById("acompanantes").value) || 0;
+
+      if (!esFederado) precio += 2;
+
+      let precioComida = tieneComida ? 5 : 0;
+      let precioAcompanantes = tieneComida ? numAcompanantes * 12 : 0;
+
+      let total = precio + precioComida + precioAcompanantes;
+      document.getElementById("total").innerText = total.toFixed(2);
+
+      // Convertir a céntimos
+      const amountCents = Math.round(total * 100).toString();
+      document.getElementById("amountField").value = amountCents;
+    }
+
+    function toggleAcompanantes() {
+      const container = document.getElementById("acompanantesContainer");
+      const checkbox = document.getElementById("comida");
+      container.classList.toggle("hidden", !checkbox.checked);
+      document.getElementById("acompanantes").value = "0";
+      calcular();
+    }
+
+    function enviarAPago() {
+      // Validar que haya valor antes de enviar
+      const amount = document.getElementById("amountField").value;
+      if (!amount || amount === "0") {
+        alert("El importe no puede estar vacío");
+        return false;
+      }
+
+      document.getElementById("redsysForm").submit();
+    }
+  </script>
+
+</body>
+</html>
